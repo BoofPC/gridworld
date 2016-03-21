@@ -1,0 +1,60 @@
+plugins {
+    id 'eclipse'
+    id 'java'
+    id 'maven'
+    id 'distribution'
+}
+
+version = '1.02'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+}
+
+if (JavaVersion.current().isJava8Compatible()) {
+  tasks.withType(Javadoc) {
+    options.addStringOption 'Xdoclint:none', '-quiet'
+  }
+}
+
+javadoc {
+    options {
+        links "http://docs.oracle.com/javase/8/docs/api/"
+    }
+}
+
+distributions {
+    main {
+        contents {
+            from('src/') { into 'src/' }
+            from('projects/') { into 'projects/' }
+            from('build/docs/javadoc/') { into 'javadoc/' }
+            from('build/libs/gridworld.jar')
+            from('build.gradle', 'settings.gradle')
+        }
+    }
+}
+
+[distZip, distTar]*.dependsOn(jar, javadoc)
+
+task writePom << {
+    pom {
+        groupId = 'info.gridworld'
+        project {
+            name 'GridWorld'
+            url 'https://github.com/BoofPC/gridworld'
+            description 'Maven & Gradle version of http://horstmann.com/gridworld/'
+            inceptionYear '2005'
+            licenses {
+                license {
+                    name 'GNU General Public License Version 2'
+                    url 'https://gnu.org/licenses/old-licenses/gpl-2.0.txt'
+                    distribution 'repo'
+                }
+            }
+        }
+    }.writeTo("pom.xml")
+}
